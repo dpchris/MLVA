@@ -492,10 +492,10 @@ def main() : #run find() for each genome file in the directory with all primers 
 		if i ==0 : 
 			output_file=[]
 			header = ["strain","primer","position1","position2","size","allele","sequence","nb_mismatch","primer1","mismatch1","primer2","mismatch2","predicted PCR target"]
-			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","w"), delimiter=';',quoting=csv.QUOTE_ALL)
+			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","w"), delimiter=';',quoting=csv.QUOTE_NONE)
 			for row in [header] :
 				out.writerow(row)
-			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","a"), delimiter=';',quoting=csv.QUOTE_ALL)
+			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","a"), delimiter=';',quoting=csv.QUOTE_NONE)
 
 		cr=[]
 		for Primer in Primers_short :
