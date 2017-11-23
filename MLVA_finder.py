@@ -428,10 +428,7 @@ def main() : #run find() for each genome file in the directory with all primers 
 				sys.exit(2)
 			Primers = open(arg,"r").read()
 		elif opt in ("-o", "--output"):
-			if os.path.exists(arg) is False : 
-				print ("output directory path is invalid")
-				usage()
-				sys.exit(2)
+			if os.path.exists(arg) is False : os.makedirs(arg)
 			output_path = arg
 			if output_path[-1] != "/" : output_path=output_path+"/"
 		elif opt in ("-m","--mismatch"):
