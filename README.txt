@@ -2,15 +2,16 @@ In silico README
 
 ### Dependencies ###
 
+python3
 python-dev (sudo apt-get install python-dev), 
 regex (https://launchpad.net/ubuntu/+archive/primary/+files/python-regex_0.1.20170117.orig.tar.gz)
 
 ### goal ###
 
-insilico.py is a python script designed to do Mutli loci VNTR analysis
+MLVA_finder.py is a python script designed to do Mutli loci VNTR analysis
 (VNTR stand for Variable Number of Tandem Repeats ).
 The goal of insilico is to find from fasta file(s), sequences of tandem repeat 
-and assign an MLVA value for each loci.
+and assign an MLVA value for each locus.
 This script use a list of primers to get loci's sequences.
 The number of mismatch can be set in the command line. 
 
@@ -39,22 +40,23 @@ example : Lp03_96bp_941bp_8U	CAACCAATGAAGCAAAAGCA	AGGGGTTGATGGTCTCAATG
 
 ### output ### 
 
-MLVA file : csv file containing all MLVA value for each fasta file and all loci from the MLVA analysis 
+MLVA_analysis_xxx.csv : csv file containing all MLVA value for each fasta file and all loci from the MLVA analysis 
 	    this csv file is designed to be uploaded on http://microbesgenotyping.i2bc.paris-saclay.fr
 output file : csv file containing All information from the MLVA analysis such as primers positions of match(s), size of insert, number of mismatch etc
 mismatch file : txt file containing all different mismatch for each locus (only locus with mismatchs) found during MLVA analysis on input fasta sequence
+predicted-pcr-size-table.csv : optional csv file containing predicted pcd size
 
 ### examples ###
 
-python [/path/to]/In_silico/insilico.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt
-python [/path/to]/In_silico/insilico.py --input data_test/legionella_pneumophila/ --output [/path/to]In_silico/ --primer data_test/Legionella_pneumophila_primers.txt (equivalent to the previous one)
+python3.6 [/path/to]/MLVA/MLVA_finder.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt
+python3.6 [/path/to]/MLVA/MLVA_finder.py --input data_test/legionella_pneumophila/ --output [/path/to]In_silico/ --primer data_test/Legionella_pneumophila_primers.txt (equivalent to the previous one)
 
 with different number of mismatch allowed :
-python [/path/to]In_silico/insilico.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt -m 1
-python [/path/to]In_silico/insilico.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt -m 4
+python3.6 [/path/to]/MLVA/MLVA_finder.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt -m 1
+python3.6 [/path/to]/MLVA/MLVA_finder.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt -m 4
 
 If fasta files contains contigs (and only contigs) :
-python [/path/to]In_silico/insilico.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt -c
-python [/path/to]In_silico/insilico.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt -c -m 0
+python3.6 [/path/to]/MLVA/MLVA_finder.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt -c
+python3.6 [/path/to]/MLVA/MLVA_finder.py -i data_test/legionella_pneumophila/ -o . -p data_test/Legionella_pneumophila_primers.txt -c -m 0
 
 #written by D.Christiany

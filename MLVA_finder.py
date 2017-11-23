@@ -38,7 +38,7 @@ def clean_primers (primers_list) :
 		tmp.append(primers)
 	return tmp
 
-def inverComp (seq) :					#return the inversed complementary sequence : TTCGA -> TCGAA
+def inverComp (seq) :						#return the inversed complementary sequence : TTCGA -> TCGAA
 	seq = seq.upper()                  		#acgt -> ACGT
 	seq_comp="".join([dico_comp[nuc] for nuc in seq[::-1]])
 	return (seq_comp)
@@ -57,7 +57,7 @@ def degenerated_primer(primer1,primer2) :
 	degenerated_primer=''
 	for c1,c2 in zip(primer1,primer2) :
 		if c1!=c2 and c2 != "." :
-			print c1,c2
+			print (c1,c2)
 			c=dico_degenerate["".join(sorted((c1+c2).upper()))] 
 		elif c2=="." :
 			c=""
@@ -66,7 +66,7 @@ def degenerated_primer(primer1,primer2) :
 		degenerated_primer+=c
 	return degenerated_primer
 
-def positionsOfMatches (result,seq) : 			#get the matches positions in the fasta sequence
+def positionsOfMatches (result,seq) : 				#get the matches positions in the fasta sequence
 	pos = []  
 	for res in result :
 		pos.append([seq.find(res),res])
@@ -87,21 +87,21 @@ def pretty_mismatch (primer, found, nb_mismatch) : 	#lower the mismatches nucleo
 	if len(found) == len(primer) and nb_mismatch>=len([e for e,i in zip(primer,found) if e!=i]) : #only mismatch(s)
 		found="".join([n.lower() if n!=r else n for r,n in zip(primer,found)])
 
-	elif len(found) < len(primer) : #deletion
-		if found in primer :  #only deletion, no mismatch(s), at the start or at the end
+	elif len(found) < len(primer) : 				#deletion
+		if found in primer :  						#only deletion, no mismatch(s), at the start or at the end
 			diff = primer.find(found)		
 			if diff == 0 :
 				found = found+(len(primer)-len(found))*"."
 
 			elif diff != -1 :
 				found = (len(primer)-len(found))*"."+found
-		elif len(primer)-len(found) == nb_mismatch : #only deletion, no mismatch(s)
+		elif len(primer)-len(found) == nb_mismatch : 	#only deletion, no mismatch(s)
 			for i,n in enumerate(primer) :
 				if i<len(found) :
 					if found[i]!=n : found=found[:i]+"."+found[i:]
 				else :
 					found=found+'.'
-		else : #deletion(s) and mismatch(s)
+		else : 											#deletion(s) and mismatch(s)
 			i=0
 			res=''
 			tmp=''
@@ -127,7 +127,7 @@ def pretty_mismatch (primer, found, nb_mismatch) : 	#lower the mismatches nucleo
 			if len(res)==len(found) : found=res
 			 
 	elif len(found) > len(primer) :
-		if diff == nb_mismatch : #only insertion(s)
+		if diff == nb_mismatch : 				#only insertion(s)
 			i=0
 			tmp=primer
 			while i < len(primer)+diff : 
@@ -136,7 +136,7 @@ def pretty_mismatch (primer, found, nb_mismatch) : 	#lower the mismatches nucleo
 					tmp=tmp[:i]+"."+tmp[i:]
 				i+=1
 
-		else : #insertion(s) + mismatch(s)
+		else : 									#insertion(s) + mismatch(s)
 			res=''
 			tmp = False
 			for diff in range(nb_mismatch+1)[1:] :
@@ -151,7 +151,8 @@ def pretty_mismatch (primer, found, nb_mismatch) : 	#lower the mismatches nucleo
 
 	return found
 
-def clean_mismatches (nbprimer,primer,sense_list,found_list,nb_mismatch) : #return the mismatches with differences in lower character from findfirst and findsec result
+#return the mismatches with differences in lower character from findfirst and findsec result
+def clean_mismatches (nbprimer,primer,sense_list,found_list,nb_mismatch) : 
 
 	res_found = []
 	for sense,found in zip(sense_list,found_list) :
@@ -165,12 +166,10 @@ def clean_mismatches (nbprimer,primer,sense_list,found_list,nb_mismatch) : #retu
 		if found == primer : return ['']*len(found_list)
 		res_found.append(pretty_mismatch(primer,found,nb_mismatch))
 
-		#if len(primer) in [len(res) for res in res_found] :				#if there's a mismatch with the same length as the primer
-		#	res_found = [res for res in res_found if len(res) == len(primer)] 	#only keep mismatchs with the same length
-
 	return (res_found)
 
-def mismatches (nb,primer,seq,nbmismatch) :					#function to find match(es) with at least two mismatches 
+#function to find match(es) with at least two mismatches 
+def mismatches (nb,primer,seq,nbmismatch) :
 	match = []
 	sense = []
 	len_mismatch = []
@@ -195,9 +194,9 @@ def mismatches (nb,primer,seq,nbmismatch) :					#function to find match(es) with
 				len_mismatch.append(len(tmpfind[i]))
 
 	elif nb==2 :
-		tmpfind = search_matches(nbmismatch,primer,seq) 			#get all matches
+		tmpfind = search_matches(nbmismatch,primer,seq) 		#get all matches
 		tmpfind=remove_redondant_matches(tmpfind,primer)
-		positions_f = positionsOfMatches(tmpfind,seq)		#get positions of matches
+		positions_f = positionsOfMatches(tmpfind,seq)			#get positions of matches
 		if tmpfind != [] :
 			for i,res in enumerate(positions_f) :
 				match.append(res[0])
@@ -207,8 +206,8 @@ def mismatches (nb,primer,seq,nbmismatch) :					#function to find match(es) with
 
 	return (match,sense,tmpfind,len_mismatch)					#return results (position of match + sense of primer)
 
-
-def findFirst (primer,seq,nbmismatch) :          			#first search of the primer on the sequence (use inverComp() and mismatch())
+#first search of the primer on the sequence (use inverComp() and mismatch())
+def findFirst (primer,seq,nbmismatch) :
 
 	match = []
 	sense = []                    					#to store the sense of search (normal or inversed) 
@@ -218,14 +217,14 @@ def findFirst (primer,seq,nbmismatch) :          			#first search of the primer 
 		result=seq.find(primer)
 		while (result!=-1) :          				#while the search has not been made on the entire sequence               
 			match.append(result)             
-			position=result+1     				#next search will start one nucleotide after the position of the last match
+			position=result+1     					#next search will start one nucleotide after the position of the last match
 			sense.append("norm")
 			result=seq.find(primer,position)		#next search, if no more match : resul = -1 -> end of the loop
 
-		if match == [] :                         		#if no perfect match found with the regular primer 
+		if match == [] :                         	#if no perfect match found with the regular primer 
 			primer_inv=inverComp(primer)			#get the inversed complementary primer with inverComp()
 			result=seq.find(primer_inv)
-			while(result!=-1):				#same search with the converted primer
+			while(result!=-1):						#same search with the converted primer
 				match.append(result)                 
 				position=result+1   
 				sense.append("inv")
@@ -236,7 +235,8 @@ def findFirst (primer,seq,nbmismatch) :          			#first search of the primer 
 
 	return (match,sense,mismatchs,len_mismatch)
 
-def findSec(primer,seq,sense,nbmismatch) : 				#search a match for the second primer
+#search a match for the second primer
+def findSec(primer,seq,sense,nbmismatch) :
 	match = []
 	mismatchs = []
 	len_mismatch=[]
@@ -245,7 +245,7 @@ def findSec(primer,seq,sense,nbmismatch) : 				#search a match for the second pr
 		result=seq.find(primer)
 		while(result!=-1) :                      		#while there's a result
 			match.append(result)          
-			position=result+1				#get the position of the following nucleotide for the next search
+			position=result+1							#get the position of the following nucleotide for the next search
 			result=seq.find(primer,position)
 
 	elif nbmismatch >= 1 and match == [] :
@@ -253,38 +253,36 @@ def findSec(primer,seq,sense,nbmismatch) : 				#search a match for the second pr
 
 	return match,mismatchs, len_mismatch
 
-def find(primers,fasta,round,nbmismatch) : 			#return the result of the matches 
+#return the result of the matches
+def find(primers,fasta,round,nbmismatch) : 
 	
-	fasta = fasta.replace(" ","").replace("\t","")		#delete spaces and tabulations
-	#mismatchs2 = []                      
+	fasta = fasta.replace(" ","").replace("\t","")		#delete spaces and tabulations                   
 	
-	sequences = fasta.split('>')[1:]				#split the fasta files into a list of fasta file
+	sequences = fasta.split('>')[1:]					#split the fasta files into a list of fasta file
 	dico_res = {}
 
-	for s,seq in enumerate(sequences) :			#for each chromosome in the fasta file
-		tmp_seq = seq.split("\n")
-		title_seq = tmp_seq[0]
-		del tmp_seq[0]
-		seq = "".join(tmp_seq).upper()
+	for s,seq in enumerate(sequences) :					#for each chromosome in the fasta file
+		title_seq = seq.split("\n")[0]
+		seq = "".join(seq.split("\n")[1:]).upper()
 
-		if primers :					#if primers had been entered
-			for p,primer in enumerate(primers) :					#for each couple of primers 
+		if primers :									#if primers had been entered
+			for p,primer in enumerate(primers) :		#for each couple of primers 
 				primer_info = primer[0].split('_')
 				tmp1, tmp2, mismatchs, len_mismatch = findFirst(primer[1],seq,nbmismatch)
 				if nbmismatch > 0 and mismatchs != [] : mismatchs = clean_mismatches(1,primer[1],tmp2,mismatchs,nbmismatch)
 				first_match = tmp1, tmp2, len_mismatch								#search match(es) for the first primer 
 				result = []
 				insert=""
-				for i,pos_match in enumerate(first_match[0]) :							#for each match of the first primer
-					tmp, mismatchs2, len_mismatch2 = findSec(primer[2],seq,first_match[1][i],nbmismatch)			#search match(es) for the second primer
+				for i,pos_match in enumerate(first_match[0]) :						#for each match of the first primer
+					tmp, mismatchs2, len_mismatch2 = findSec(primer[2],seq,first_match[1][i],nbmismatch)													#search match(es) for the second primer
 					if nbmismatch > 0 and mismatchs2 != [] : mismatchs2 = clean_mismatches(2,primer[2],[first_match[1][i]]*len(tmp),mismatchs2,nbmismatch) 	#lower the mismatched nucleotides
-					if tmp != [] :								#if there is a match with the second primer on the complementary DNA sequence
-						for m,pos_match2 in enumerate(tmp) :					#for each match found for the second primer
+					if tmp != [] :													#if there is a match with the second primer on the complementary DNA sequence
+						for m,pos_match2 in enumerate(tmp) :						#for each match found for the second primer
 							if nbmismatch >0 : 
 								len_match=first_match[2][i]
 								len_match2=len_mismatch2[m]
-								mismatch=mismatchs[i]							#get the coresponding mismatch of the 1st primer
-								mismatch2=mismatchs2[m]							#get the coresponding mismatch of the second primer 
+								mismatch=mismatchs[i]								#get the coresponding mismatch of the 1st primer
+								mismatch2=mismatchs2[m]								#get the coresponding mismatch of the second primer 
 							else :
 								len_match=len(primer[1])
 								len_match2=len(primer[2])
@@ -304,7 +302,7 @@ def find(primers,fasta,round,nbmismatch) : 			#return the result of the matches
 							if size > 0 : 							
 
 								#insert may contains indel in primers area
-								if size2==size and contig is False :					#if insert is separated by the splitted area in the sequence (circular chromosome)
+								if size2==size and contig is False :									#if insert is separated by the splitted area in the sequence (circular chromosome)
 									if pos_match < pos_match2 : insert = inverComp(seq[pos_match2:]+seq[:pos_match+len(primer[1])]) #reversed comp insert
 									else : insert = seq[pos_match:]+seq[:pos_match2+len(primer[2])] 
 								else :		
@@ -313,9 +311,9 @@ def find(primers,fasta,round,nbmismatch) : 			#return the result of the matches
 
 								sizeU = abs(float(primer_info[3].upper().replace("U",""))-\
 									((float(primer_info[2].lower().replace("bp",""))-size)\
-									/float(primer_info[1].lower().replace("bp",""))))		#computation of sizeU
+									/float(primer_info[1].lower().replace("bp",""))))					#computation of sizeU
 
-								if binning is True and primer[0]in dico_bin.keys() : #if option binning selected, correction with the dictionary
+								if binning is True and primer[0]in dico_bin.keys() : 					#if option binning selected, correction with the dictionary
 									sizeU = binning_correction(primer[0],size,sizeU)
 
 								if sizeU < 100 : result.append([primer[0],pos_match,pos_match2,size,sizeU,sequence+str(s+1),nbmismatch,primer[1],mismatch,primer[2],mismatch2,insert])
@@ -323,12 +321,12 @@ def find(primers,fasta,round,nbmismatch) : 			#return the result of the matches
 				if len(result) == 0 and primer_info[0] not in dico_res.keys() :	#if no result
 					dico_res[primer_info[0]]=[primer[0],"","","","","",nbmismatch,primer[1],"",primer[2],"",""]	
 
-				elif len(result) > 0 :						#if result(s)
+				elif len(result) > 0 :											#if result(s)
 					best_res = result[0]
-					for res in result :					#keep the result with the minimum sizeU value
+					for res in result :											#keep the result with the minimum sizeU value
 						if res[4]<best_res[4] : best_res=res	
 
-					if round !="" and round>0 :                    		#round of the sizeU value
+					if round !="" and round>0 :                    				#round of the sizeU value
 						sizeU=best_res[4]
 						if sizeU>=math.floor(sizeU) and sizeU<(math.floor(sizeU)+round) :
 							sizeU = math.floor(sizeU)
@@ -337,30 +335,32 @@ def find(primers,fasta,round,nbmismatch) : 			#return the result of the matches
 						else :
 							sizeU=math.floor(sizeU)+0.5
 						if str(sizeU)[-2:]=='.0' : sizeU=int(sizeU)
-						best_res[4]=sizeU				#set of the rounded sizeU value
+						best_res[4]=sizeU									#set of the rounded sizeU value
 					if primer_info[0] in dico_res.keys() and dico_res[primer_info[0]][4] != "" :
 						best_res[5] = best_res[5]+", "+sequence+str(s+1) 	#if there's already a result with perfect matches
-					dico_res[primer_info[0]]=best_res			#set the best result as a new key : value in the dictionnary #replace the old dictionnary value if there is one
+					dico_res[primer_info[0]]=best_res						#set the best result as a new key : value in the dictionnary #replace the old dictionnary value if there is one
 
 	return dico_res
 
-def get_empty_locus (dico_result) : #return primers with no result 
+#return primers with no result 
+def get_empty_locus (dico_result) :
 	tmpprimers = []
 	for locus in dico_result.keys() :
 		if dico_result[locus][4] == '' :
 			tmpprimers.append([dico_result[locus][0],dico_result[locus][7],dico_result[locus][9]])
 	return tmpprimers
 
-def run (Primers,fasta,round,nbmismatch) : #search MLVA with perfect match, then allow one additional mismatch for locus with no result until the number max of mismatch allowed 
+#search MLVA with perfect match, then allow one additional mismatch for locus with no result until the number max of mismatch allowed 
+def run (Primers,fasta,round,nbmismatch) : 
 	tmp = len(Primers)
 	tmpPrimers = Primers
 	result = {}
 	for mismatch_allowed in range(int(nbmismatch)+1) :
-		tmp_dico = find(tmpPrimers,fasta,round,mismatch_allowed) 			#search with no mismacth
-		result = dict(result.items() + tmp_dico.items())				#add results to the dictionnary
+		tmp_dico = find(tmpPrimers,fasta,round,mismatch_allowed) 	#search with no mismacth
+		result.update(tmp_dico)										#add results to the dictionnary
 		tmpPrimers = get_empty_locus(result)						#only keep locus with no result
 		nb_match = tmp -len(tmpPrimers) 
-		print "results with",mismatch_allowed,"mismatch(s): ",nb_match,"/",len(Primers)
+		print ("results with",mismatch_allowed,"mismatch(s): ",nb_match,"/",len(Primers))
 
 		tmp = len(tmpPrimers)
 
@@ -368,19 +368,19 @@ def run (Primers,fasta,round,nbmismatch) : #search MLVA with perfect match, then
 			break 
 
 	if len(tmpPrimers) != 0 : 
-		print "no match : ", tmp
+		print ("no match : ", tmp)
 
 	return result
 
 def usage() : #example of command to use insilico.py 
-	print "./insilico.py -i <input_directory> -o <output_directory> -p <primers_file> \n \
+	print ("./insilico.py -i <input_directory> -o <output_directory> -p <primers_file> \n \
 	[option -c for contigs] \n\
 	[option -m x for number of mismatch, default = 2] \n\
 	[option -r x : round MLVA score, default = 0.25] \n\
 	[option -b : binning file is used to correct MLVA value for primers in binning_file.csv] \n\
 	[option --mixte : fasta file with one sequence will be considered as chromosome and fasta with sequences as contigs] \n\
 	[option --full-locus-name : header will be full locus name instead of reduced locus name] \n\
-	[option --predicted-PCR-size-table : output a supplementary table with all predicted PCR size ] "
+	[option --predicted-PCR-size-table : output a supplementary table with all predicted PCR size ] ")
   
 def main() : #run find() for each genome file in the directory with all primers in the primers file
 
@@ -414,7 +414,7 @@ def main() : #run find() for each genome file in the directory with all primers 
 			sys.exit()
 		elif opt in ("-i", "--input"):
 			if os.path.exists(arg) is False : 
-				print "input directory path is invalid" 
+				print ("input directory path is invalid") 
 				usage()
 				sys.exit(2)
 			fasta_path = arg
@@ -423,13 +423,13 @@ def main() : #run find() for each genome file in the directory with all primers 
 			files=sorted(files)
 		elif opt in ("-p", "--primer"): 
 			if os.path.exists(arg) is False : 
-				print "primers list csv path is invalid" 
+				print ("primers list csv path is invalid") 
 				usage()
 				sys.exit(2)
 			Primers = open(arg,"r").read()
 		elif opt in ("-o", "--output"):
 			if os.path.exists(arg) is False : 
-				print "output directory path is invalid" 
+				print ("output directory path is invalid")
 				usage()
 				sys.exit(2)
 			output_path = arg
@@ -454,23 +454,20 @@ def main() : #run find() for each genome file in the directory with all primers 
 		else:
 			assert False, "unhandled option"
 
- 
- 	Primers = Primers.replace("\r","").split("\n")
+	Primers = Primers.replace("\r","").split("\n")
 	if Primers[-1]=="" : del Primers[-1]
 	Primers=clean_primers(Primers)
 	Primers_short = [pri[0].split("_")[0] for pri in Primers]
 	Primers_full = [pri[0] for pri in Primers]
 
 	#header of output_file
-
-
 	for i,file in enumerate(files) :
-		print file, "\t strain ",i+1,"/",len(files)
+		print (file, "\t strain ",i+1,"/",len(files))
 		fasta = open(fasta_path+file,"r").read()
 		fasta_names = []
 		for line in fasta.split("\n") :
 			if ">" in line :
-				if '|' in line and len(line.split("|")) >=5 : 								#for fasta names like : >gi|1032812322|ref|NZ_CP015344.1| Legionella pneumophila strain D-7630, complete genome
+				if '|' in line and len(line.split("|")) >=5 : 	#for fasta names like : >gi|1032812322|ref|NZ_CP015344.1| Legionella pneumophila strain D-7630, complete genome
 					tmp_names=line.replace("\n","").split("|")
 					fasta_names.append([tmp_names[3].split(".")[0],tmp_names[4][1:].split(",")[0]]) 
 					del tmp_names
@@ -478,7 +475,7 @@ def main() : #run find() for each genome file in the directory with all primers 
 					tmp_names=line.replace("\n","").split(",")[0].split(" ")
 					fasta_names.append([tmp_names[0].replace(">","")," ".join(tmp_names[1:])])
 		if len(fasta_names)==0 : 
-				print 'no fasta header found in',file 
+				print ('no fasta header found in',file) 
 				sys.exit()
 
 		if mixte is True  :	#check for each fasta if there is more than one sequence (contigs) or not with --mixte option
@@ -502,8 +499,6 @@ def main() : #run find() for each genome file in the directory with all primers 
 
 		cr=[]
 		for Primer in Primers_short :
-			#result[Primer][8]= ", ".join(result[Primer][8])
-			#result[Primer][10]= ", ".join(result[Primer][10])
 			if result[Primer][4]=='' : result[Primer][6]='ND'
 			cr.append([file]+result[Primer])
 
@@ -515,10 +510,6 @@ def main() : #run find() for each genome file in the directory with all primers 
 		#MLVA_analysis_file
 		locus, mlva_score, mlva_insert = ([] for i in range(3))
 		for primer_short,primer_full in zip(Primers_short,Primers_full) :
-			#if result[Primer][1]=="" :
-			#	result[Primer][6] = 99
-			#if result[Primer][6] not in [0,99] :
-			#	print " ".join([Primer]+[" P1 :"]+[result[Primer][7]]+["\nmmatch(s):"]+result[Primer][8]+["\n\n"]+[Primer]+["P2 :"]+[result[Primer][9]]+["\nmmatch(s):"]+result[Primer][10]+["\n"])
 			if full_locus_name is False : locus.append(primer_short)
 			else : locus.append(primer_full)
 			mlva_score.append(str(result[primer_short][4]))		#scores 
@@ -526,8 +517,8 @@ def main() : #run find() for each genome file in the directory with all primers 
 
 		if i==0 :
 			pathfile = output_path+"MLVA_analysis_"+fasta_path.split("/")[-2]+".csv"
-			output = open(pathfile,"w") 								#output is a csv file (delimiter=";")
-			output.write(";".join(["key","Access_number"]+locus)+"\n")  		#header
+			output = open(pathfile,"w") 									#output is a csv file (delimiter=";")
+			output.write(";".join(["key","Access_number"]+locus)+"\n")  	#header
 			output = open(pathfile,"a")
 
 		output.write(";".join([str(i+1).zfill(3),file.split(".")[0]]+mlva_score)+"\n")
@@ -537,8 +528,8 @@ def main() : #run find() for each genome file in the directory with all primers 
 
 			if i==0 :
 				pathfile = output_path+"predicted_PCR_size_table_"+fasta_path.split("/")[-2]+".csv"
-				output_pcr_size = open(pathfile,"w") 								#output is a csv file (delimiter=";")
-				output_pcr_size.write(";".join(["key","Access_number"]+locus)+"\n")  		#header
+				output_pcr_size = open(pathfile,"w") 									#output is a csv file (delimiter=";")
+				output_pcr_size.write(";".join(["key","Access_number"]+locus)+"\n")  	#header
 				output_pcr_size = open(pathfile,"a")
 
 			output_pcr_size.write(";".join([str(i+1).zfill(3),file.split(".")[0]]+mlva_insert)+"\n")
@@ -546,7 +537,7 @@ def main() : #run find() for each genome file in the directory with all primers 
 	output.close()
 	if predicted_PCR_size_table is True : output_pcr_size.close()
 	
-	print "MLVA analysis finished for "+fasta_path.split("/")[-2]
+	print ("MLVA analysis finished for "+fasta_path.split("/")[-2])
 
 	##### creation of mismatch summary txt file #####
 
@@ -566,13 +557,10 @@ def main() : #run find() for each genome file in the directory with all primers 
 	for primer in Primers :
 		if primer[0]+"_FOR" in dico_mismatch.keys() :
 			tmp_file += primer[0]+"_FOR\r\n"+primer[1]+"\r\n"+"\r\n".join(list(dico_mismatch[primer[0]+"_FOR"]))+"\r\n\r\n"
-			#tmp_file += "degenerated_primer: " + "\t".join([degenerated_primer(primer[1],p) for p in list(dico_mismatch[primer[0]+"_FOR"])])+"\r\n\r\n"
 		if primer[0]+"_REV" in dico_mismatch.keys() :
 			tmp_file += primer[0]+"_REV\r\n"+primer[2]+"\r\n"+"\r\n".join(list(dico_mismatch[primer[0]+"_REV"]))+"\r\n\r\n"
-			#tmp_file += "degenerated_primer: " + "\t".join([degenerated_primer(primer[1],p) for p in list(dico_mismatch[primer[0]+"_REV"])])+"\r\n\r\n"
 	output_mismatch.write(tmp_file)
 	output_mismatch.close()
 
 if __name__ == "__main__" :
 	main()
-
