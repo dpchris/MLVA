@@ -66,6 +66,23 @@ def degenerated_primer(primer1,primer2) :
 		degenerated_primer+=c
 	return degenerated_primer
 
+def get_flanking(seq,primers,pos1,pos2,splitted):
+	if splitted is True :
+		if pos1 < pos2 : 
+			f1= inverComp(seq[pos2-flanking_len+len(primers[2]):pos2+len(primers[2])])
+			f2= inverComp(seq[pos1:pos1+flanking_len])
+		else :
+			f1= seq[pos1-flanking_len+len(primers[1]):pos1+len(primers[1])]
+			f2= seq[pos2:pos2+flanking_len]
+	else :
+		if pos1 < pos2 :
+			f1= seq[pos1-flanking_len+len(primers[1]):pos1+len(primers[1])]
+			f2= seq[pos2:pos2+flanking_len]
+		else :
+			f1=inverComp(seq[pos1:pos1+flanking_len])
+			f2=inverComp(seq[pos2-flanking_len+len(primers[2]):pos2+len(primers[2])])
+	return [f1,f2]
+
 def positionsOfMatches (result,seq) : 				#get the matches positions in the fasta sequence
 	pos = []  
 	for res in result :
@@ -290,19 +307,22 @@ def find(primers,fasta,round,nbmismatch) :
 								mismatch2=''
 
 							#size is calculated with the primers size given, and not the match of the primers which may contain indel
+							splitted = False
 							if first_match[1][i] == "inv" :
 								size = pos_match+len(primer[1])-(pos_match2+len_match2-len(primer[2]))
 								size2 = pos_match+len(primer[1])+(len(seq)-(pos_match2+len_match2-len(primer[2])))	#if primers are separated by the splitted area in the sequence (circular chromosome)
-								if size > 0 and size2 < size and contig is False : size = size2
 							else :
 								size = pos_match2+len(primer[2])-(pos_match+len_match-len(primer[1])) 
 								size2 =pos_match2+len(primer[2])+(len(seq)-(pos_match+len_match-len(primer[1])))
-								if size > 0 and size2 < size and contig is False: size = size2	
+
+							if contig is False and size > 0 and size2 < size : 
+								size = size2	
+								splitted=True
 
 							if size > 0 : 							
 
 								#insert may contains indel in primers area
-								if size2==size and contig is False :									#if insert is separated by the splitted area in the sequence (circular chromosome)
+								if splitted is True :									#if insert is separated by the splitted area in the sequence (circular chromosome)
 									if pos_match < pos_match2 : insert = inverComp(seq[pos_match2:]+seq[:pos_match+len(primer[1])]) #reversed comp insert
 									else : insert = seq[pos_match:]+seq[:pos_match2+len(primer[2])] 
 								else :		
@@ -339,6 +359,8 @@ def find(primers,fasta,round,nbmismatch) :
 					if primer_info[0] in dico_res.keys() and dico_res[primer_info[0]][4] != "" :
 						best_res[5] = best_res[5]+", "+sequence+str(s+1) 	#if there's already a result with perfect matches
 					dico_res[primer_info[0]]=best_res						#set the best result as a new key : value in the dictionnary #replace the old dictionnary value if there is one
+					if flanking is True : 
+						dico_flanking[primer_info[0]]=get_flanking(seq,primer,pos_match,pos_match2,splitted)
 
 	return dico_res
 
@@ -380,7 +402,8 @@ def usage() : #example of command to use insilico.py
 	[option -b : binning file is used to correct MLVA value for primers in binning_file.csv] \n\
 	[option --mixte : fasta file with one sequence will be considered as chromosome and fasta with sequences as contigs] \n\
 	[option --full-locus-name : header will be full locus name instead of reduced locus name] \n\
-	[option --predicted-PCR-size-table : output a supplementary table with all predicted PCR size ] ")
+	[option --predicted-PCR-size-table : output a supplementary table with all predicted PCR size ] \n\
+	[option --flanking-seq <int>: add flanking column in <output.csv>, flanking are the sequences before and after the insert (primers inculded) ")
   
 def main() : #run find() for each genome file in the directory with all primers in the primers file
 
@@ -389,8 +412,8 @@ def main() : #run find() for each genome file in the directory with all primers 
 		sys.exit(2)
 	
 	try:		#check if correct args
-		opts, args = getopt.getopt(sys.argv[1:], "hm:i:o:p:cr:b", ["help", "mismatch=", "input=", "output=", "primer=", "contig","round="\
-			,"binning","mixte","full-locus-name","predicted-PCR-size-table"])
+		opts, args = getopt.getopt(sys.argv[1:], "hm:i:o:p:cr:bf:", ["help", "mismatch=", "input=", "output=", "primer=", "contig","round="\
+			,"binning","mixte","full-locus-name","predicted-PCR-size-table","flanking-seq="])
 	except getopt.GetoptError as err:
 		usage()
 		sys.exit(2)
@@ -407,6 +430,10 @@ def main() : #run find() for each genome file in the directory with all primers 
 	full_locus_name = False
 	global predicted_PCR_size_table
 	predicted_PCR_size_table = False
+	global flanking
+	flanking = False
+	global dico_flanking
+	dico_flanking={} 
 	round = 0.25
 	for opt, arg in opts: #get args given by user
 		if opt in ("-h", "--help"):
@@ -448,6 +475,11 @@ def main() : #run find() for each genome file in the directory with all primers 
 			full_locus_name = True
 		elif opt in "--predicted-PCR-size-table" :
 			predicted_PCR_size_table = True
+		elif opt in ("--flanking-seq" ) :
+			global flanking_len
+			flanking_len=int(arg)
+			flanking=True
+			print (flanking,flanking_len)
 		else:
 			assert False, "unhandled option"
 
@@ -489,6 +521,7 @@ def main() : #run find() for each genome file in the directory with all primers 
 		if i ==0 : 
 			output_file=[]
 			header = ["strain","primer","position1","position2","size","allele","sequence","nb_mismatch","primer1","mismatch1","primer2","mismatch2","predicted PCR target"]
+			if flanking is True : header.extend(['flanking1',"flanking2"])
 			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","w"), delimiter=';',quoting=csv.QUOTE_NONE)
 			for row in [header] :
 				out.writerow(row)
@@ -497,7 +530,8 @@ def main() : #run find() for each genome file in the directory with all primers 
 		cr=[]
 		for Primer in Primers_short :
 			if result[Primer][4]=='' : result[Primer][6]='ND'
-			cr.append([file]+result[Primer])
+			if flanking is True and Primer in dico_flanking.keys(): cr.append([file]+result[Primer]+dico_flanking[Primer])
+			else : cr.append([file]+result[Primer])
 
 		for row in cr :
 			out.writerow(row)
