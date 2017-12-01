@@ -530,7 +530,9 @@ def main() : #run find() for each genome file in the directory with all primers 
 		cr=[]
 		for Primer in Primers_short :
 			if result[Primer][4]=='' : result[Primer][6]='ND'
-			if flanking is True and Primer in dico_flanking.keys(): cr.append([file]+result[Primer]+dico_flanking[Primer])
+			if flanking is True : 
+				if Primer in dico_flanking.keys() : cr.append([file]+result[Primer]+dico_flanking[Primer])
+				else : cr.append([file]+result[Primer]+["",""])
 			else : cr.append([file]+result[Primer])
 
 		for row in cr :
