@@ -522,10 +522,10 @@ def main() : #run find() for each genome file in the directory with all primers 
 			output_file=[]
 			header = ["strain","primer","position1","position2","size","allele","sequence","nb_mismatch","primer1","mismatch1","primer2","mismatch2","predicted PCR target"]
 			if flanking is True : header.extend(['flanking1',"flanking2"])
-			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","w"), delimiter=';',quoting=csv.QUOTE_NONE)
+			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","w",encoding='utf-8'), delimiter=';',quoting=csv.QUOTE_NONE)
 			for row in [header] :
 				out.writerow(row)
-			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","a"), delimiter=';',quoting=csv.QUOTE_NONE)
+			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","a",encoding='utf-8'), delimiter=';',quoting=csv.QUOTE_NONE)
 
 		cr=[]
 		for Primer in Primers_short :
@@ -550,9 +550,9 @@ def main() : #run find() for each genome file in the directory with all primers 
 
 		if i==0 :
 			pathfile = output_path+"MLVA_analysis_"+fasta_path.split("/")[-2]+".csv"
-			output = open(pathfile,"w") 									#output is a csv file (delimiter=";")
+			output = open(pathfile,"w",encoding='utf-8') 									#output is a csv file (delimiter=";")
 			output.write(";".join(["key","Access_number"]+locus)+"\n")  	#header
-			output = open(pathfile,"a")
+			output = open(pathfile,"a",encoding='utf-8')
 
 		output.write(";".join([str(i+1).zfill(3),file.split(".")[0]]+mlva_score)+"\n")
 
@@ -561,9 +561,9 @@ def main() : #run find() for each genome file in the directory with all primers 
 
 			if i==0 :
 				pathfile = output_path+"predicted_PCR_size_table_"+fasta_path.split("/")[-2]+".csv"
-				output_pcr_size = open(pathfile,"w") 									#output is a csv file (delimiter=";")
+				output_pcr_size = open(pathfile,"w",encoding='utf-8') 									#output is a csv file (delimiter=";")
 				output_pcr_size.write(";".join(["key","Access_number"]+locus)+"\n")  	#header
-				output_pcr_size = open(pathfile,"a")
+				output_pcr_size = open(pathfile,"a",encoding='utf-8')
 
 			output_pcr_size.write(";".join([str(i+1).zfill(3),file.split(".")[0]]+mlva_insert)+"\n")
 
