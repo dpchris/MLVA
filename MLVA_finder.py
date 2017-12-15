@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import re, regex, math, sys, os.path, getopt, csv
+import re, regex, math, sys, os.path, getopt, csv, itertools
 
 #dictionnary to create complementary DNA sequences
 dico_comp = {'A':'T','C':'G',"G":"C","T":"A","M":"K","R":"Y","W":"W","S":"S","Y":"R","K":"M","V":"B","H":"D","D":"H","B":"V","X":"X","N":"X",".":".","|":"|"}
-dico_degenerate = {'AG' : 'R','CT' : 'Y','CG' : 'S','AT':'W','GT':'K','AC':"M",'CGT' : 'B', "AGT" : "D",'ACT':'H',"ACG":"V","ACGT" : "N",".":"" }
+#dico_degenerate = {'AG' : 'R','CT' : 'Y','CG' : 'S','AT':'W','GT':'K','AC':"M",'CGT' : 'B', "AGT" : "D",'ACT':'H',"ACG":"V","ACGT" : "N",".":"" }
+dico_degenerate = {'R' : 'AG', 'Y' : 'CT', 'S' : 'CG', 'W':'AT','K':'GT','M':'AC','B':'CGT',"D":'AGT','H':'ACT',"V":"ACG","N":"ACGT",".":""}
 
 def build_dictionnary() : #build dictionnary for binning, take file from --binning  
 	bin_file = open("/".join(sys.argv[0].split("/")[:-1])+"/binning_file.csv","r").read()
@@ -43,6 +44,27 @@ def inverComp (seq) :						#return the inversed complementary sequence : TTCGA -
 	seq_comp="".join([dico_comp[nuc] for nuc in seq[::-1]])
 	return (seq_comp)
 
+#return all possible primers for a degenerated primer
+def degenerated_primers (primer):
+	degenerated_nucs=[]
+	positions=[]
+	primers=set()
+
+	for i,nuc in enumerate(primer) :
+		if nuc in dico_degenerate.keys() :
+			positions.append(i)
+			degenerated_nucs.append(dico_degenerate[nuc])
+	combinations=list(itertools.product(*degenerated_nucs))
+	primer=list(primer)
+
+	for comb in combinations : 
+		for pos, nuc in zip(positions,comb) :
+			primer[pos]=nuc
+		primers.add("".join(primer))
+
+	return list(primers)
+
+
 def binning_correction(primer,size,sizeU) : # correct sizeU if primer is in dico_bin
 	if primer in dico_bin.keys() :
 		tmp_size, tmp_sizeU = map(list,zip(*dico_bin[primer]))
@@ -52,19 +74,6 @@ def binning_correction(primer,size,sizeU) : # correct sizeU if primer is in dico
 			sizeU = float(tmp_sizeU[tmp_size.index(str(closest_size))].replace('u',''))
 
 	return sizeU
-
-def degenerated_primer(primer1,primer2) :
-	degenerated_primer=''
-	for c1,c2 in zip(primer1,primer2) :
-		if c1!=c2 and c2 != "." :
-			print (c1,c2)
-			c=dico_degenerate["".join(sorted((c1+c2).upper()))] 
-		elif c2=="." :
-			c=""
-		else : 
-			c=c2
-		degenerated_primer+=c
-	return degenerated_primer
 
 def get_flanking(seq,primers,pos1,pos2,splitted):
 	if splitted is True :
@@ -285,13 +294,32 @@ def find(primers,fasta,round,nbmismatch) :
 		if primers :									#if primers had been entered
 			for p,primer in enumerate(primers) :		#for each couple of primers 
 				primer_info = primer[0].split('_')
-				tmp1, tmp2, mismatchs, len_mismatch = findFirst(primer[1],seq,nbmismatch)
+				primers_1 = degenerated_primers(primer[1])
+				tmp1=[]
+				tmp2=[]
+				mismatchs=[]
+				len_mismatch=[]
+				for primer1 in primers_1 :
+					tmp1_handle, tmp2_handle, mismatchs_handle, len_mismatch_handle = findFirst(primer1,seq,nbmismatch)
+					tmp1.extend(tmp1_handle)
+					tmp2.extend(tmp2_handle)
+					mismatchs.extend(mismatchs_handle)
+					len_mismatch.extend(len_mismatch_handle)
+				#print (tmp1)
 				if nbmismatch > 0 and mismatchs != [] : mismatchs = clean_mismatches(1,primer[1],tmp2,mismatchs,nbmismatch)
 				first_match = tmp1, tmp2, len_mismatch								#search match(es) for the first primer 
 				result = []
 				insert=""
 				for i,pos_match in enumerate(first_match[0]) :						#for each match of the first primer
-					tmp, mismatchs2, len_mismatch2 = findSec(primer[2],seq,first_match[1][i],nbmismatch)													#search match(es) for the second primer
+					primers_2=degenerated_primers(primer[2])
+					tmp=[]
+					mismatchs2=[]
+					len_mismatch2=[]
+					for primer2 in primers_2 :
+						tmp_handle, mismatchs2_handle, len_mismatch2_handle = findSec(primer2,seq,first_match[1][i],nbmismatch)
+						tmp.extend(tmp_handle)
+						mismatchs2.extend(mismatchs2_handle)
+						len_mismatch2.extend(len_mismatch2_handle)													#search match(es) for the second primer
 					if nbmismatch > 0 and mismatchs2 != [] : mismatchs2 = clean_mismatches(2,primer[2],[first_match[1][i]]*len(tmp),mismatchs2,nbmismatch) 	#lower the mismatched nucleotides
 					if tmp != [] :													#if there is a match with the second primer on the complementary DNA sequence
 						for m,pos_match2 in enumerate(tmp) :						#for each match found for the second primer
@@ -479,7 +507,7 @@ def main() : #run find() for each genome file in the directory with all primers 
 			global flanking_len
 			flanking_len=int(arg)
 			flanking=True
-			print (flanking,flanking_len)
+			#print (flanking,flanking_len)
 		else:
 			assert False, "unhandled option"
 
