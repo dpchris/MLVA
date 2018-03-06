@@ -18,13 +18,13 @@ def build_dictionnary() : #build dictionnary for binning, take file from --binni
 			tmp= range(int(primer[1].split("-")[0]),int(primer[1].split("-")[1])+1)
 			tmp=[(str(e),primer[2]) for e in tmp]
 
-			if primer[0] in dico_bin.keys() :
+			if primer[0] in dico_bin :
 				dico_bin[primer[0]].extend(tmp)
 			else : 
 				dico_bin[primer[0]]=tmp
 
 		else :
-			if primer[0] in dico_bin.keys() :
+			if primer[0] in dico_bin :
 				dico_bin[primer[0]].append((primer[1],primer[2]))
 			else : 
 				dico_bin[primer[0]]=[(primer[1],primer[2])]
@@ -51,7 +51,7 @@ def degenerated_primers (primer):
 	primers=set()
 
 	for i,nuc in enumerate(primer) :
-		if nuc in dico_degenerate.keys() :
+		if nuc in dico_degenerate :
 			positions.append(i)
 			degenerated_nucs.append(dico_degenerate[nuc])
 	combinations=list(itertools.product(*degenerated_nucs))
@@ -66,7 +66,7 @@ def degenerated_primers (primer):
 
 
 def binning_correction(primer,size,sizeU) : # correct sizeU if primer is in dico_bin
-	if primer in dico_bin.keys() :
+	if primer in dico_bin :
 		tmp_size, tmp_sizeU = map(list,zip(*dico_bin[primer]))
 		closest_size = min([int(e.split(' ')[0]) for e in tmp_size], key=lambda x:abs(x-size))
 		pattern = int(primer.split('_')[1].replace('bp',''))
@@ -361,12 +361,12 @@ def find(primers,fasta,round,nbmismatch) :
 									((float(primer_info[2].lower().replace("bp",""))-size)\
 									/float(primer_info[1].lower().replace("bp",""))))					#computation of sizeU
 
-								if binning is True and primer[0]in dico_bin.keys() : 					#if option binning selected, correction with the dictionary
+								if binning is True and primer[0]in dico_bin : 					#if option binning selected, correction with the dictionary
 									sizeU = binning_correction(primer[0],size,sizeU)
 
 								if sizeU < 100 : result.append([primer[0],pos_match,pos_match2,size,sizeU,sequence+str(s+1),nbmismatch,primer[1],mismatch,primer[2],mismatch2,insert])
 
-				if len(result) == 0 and primer_info[0] not in dico_res.keys() :	#if no result
+				if len(result) == 0 and primer_info[0] not in dico_res :	#if no result
 					dico_res[primer_info[0]]=[primer[0],"","","","","",nbmismatch,primer[1],"",primer[2],"",""]	
 
 				elif len(result) > 0 :											#if result(s)
@@ -384,7 +384,7 @@ def find(primers,fasta,round,nbmismatch) :
 							sizeU=math.floor(sizeU)+0.5
 						if str(sizeU)[-2:]=='.0' : sizeU=int(sizeU)
 						best_res[4]=sizeU									#set of the rounded sizeU value
-					if primer_info[0] in dico_res.keys() and dico_res[primer_info[0]][4] != "" :
+					if primer_info[0] in dico_res and dico_res[primer_info[0]][4] != "" :
 						best_res[5] = best_res[5]+", "+sequence+str(s+1) 	#if there's already a result with perfect matches
 					dico_res[primer_info[0]]=best_res						#set the best result as a new key : value in the dictionnary #replace the old dictionnary value if there is one
 					if flanking is True : 
@@ -395,7 +395,7 @@ def find(primers,fasta,round,nbmismatch) :
 #return primers with no result 
 def get_empty_locus (dico_result) :
 	tmpprimers = []
-	for locus in dico_result.keys() :
+	for locus in dico_result :
 		if dico_result[locus][4] == '' :
 			tmpprimers.append([dico_result[locus][0],dico_result[locus][7],dico_result[locus][9]])
 	return tmpprimers
@@ -559,7 +559,7 @@ def main() : #run find() for each genome file in the directory with all primers 
 		for Primer in Primers_short :
 			if result[Primer][4]=='' : result[Primer][6]='ND'
 			if flanking is True : 
-				if Primer in dico_flanking.keys() : cr.append([file]+result[Primer]+dico_flanking[Primer])
+				if Primer in dico_flanking : cr.append([file]+result[Primer]+dico_flanking[Primer])
 				else : cr.append([file]+result[Primer]+["",""])
 			else : cr.append([file]+result[Primer])
 
@@ -616,9 +616,9 @@ def main() : #run find() for each genome file in the directory with all primers 
 	output_mismatch = open(output_path+fasta_path.split("/")[-2]+"_mismatchs.txt","w")
 	tmp_file =""
 	for primer in Primers :
-		if primer[0]+"_FOR" in dico_mismatch.keys() :
+		if primer[0]+"_FOR" in dico_mismatch :
 			tmp_file += primer[0]+"_FOR\r\n"+primer[1]+"\r\n"+"\r\n".join(list(dico_mismatch[primer[0]+"_FOR"]))+"\r\n\r\n"
-		if primer[0]+"_REV" in dico_mismatch.keys() :
+		if primer[0]+"_REV" in dico_mismatch :
 			tmp_file += primer[0]+"_REV\r\n"+primer[2]+"\r\n"+"\r\n".join(list(dico_mismatch[primer[0]+"_REV"]))+"\r\n\r\n"
 	output_mismatch.write(tmp_file)
 	output_mismatch.close()
