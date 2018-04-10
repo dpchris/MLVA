@@ -7,8 +7,8 @@ dico_comp = {'A':'T','C':'G',"G":"C","T":"A","M":"K","R":"Y","W":"W","S":"S","Y"
 #dico_degenerate = {'AG' : 'R','CT' : 'Y','CG' : 'S','AT':'W','GT':'K','AC':"M",'CGT' : 'B', "AGT" : "D",'ACT':'H',"ACG":"V","ACGT" : "N",".":"" }
 dico_degenerate = {'R' : 'AG', 'Y' : 'CT', 'S' : 'CG', 'W':'AT','K':'GT','M':'AC','B':'CGT',"D":'AGT','H':'ACT',"V":"ACG","N":"ACGT",".":""}
 
-def build_dictionnary() : #build dictionnary for binning, take file from --binning  
-	bin_file = open("/".join(sys.argv[0].split("/")[:-1])+"/binning_file.csv","r").read()
+def build_dictionnary(bin_file) : #build dictionnary for binning, take file from --binning  
+	bin_file = open(bin_file,"r").read()
 	bin_file = bin_file.replace("\t",";").replace(",",";").replace(" ",";").replace("\r","").split("\n")[:-1]
 	bin_file=[primer.split(";") for primer in bin_file]
 
@@ -431,7 +431,7 @@ def usage() : #example of command to use insilico.py
 	[option --mixte : fasta file with one sequence will be considered as chromosome and fasta with sequences as contigs] \n\
 	[option --full-locus-name : header will be full locus name instead of reduced locus name] \n\
 	[option --predicted-PCR-size-table : output a supplementary table with all predicted PCR size ] \n\
-	[option --flanking-seq <int>: add flanking column in <output.csv>, flanking are the sequences before and after the insert (primers inculded) ")
+	[option --flanking-seq <int>: add flanking column in <output.csv>, flanking are the sequences before and after the insert (primers inculded), you can chose the size of flanking sequences <int> ")
   
 def main() : #run find() for each genome file in the directory with all primers in the primers file
 
@@ -440,8 +440,8 @@ def main() : #run find() for each genome file in the directory with all primers 
 		sys.exit(2)
 	
 	try:		#check if correct args
-		opts, args = getopt.getopt(sys.argv[1:], "hm:i:o:p:cr:bf:", ["help", "mismatch=", "input=", "output=", "primer=", "contig","round="\
-			,"binning","mixte","full-locus-name","predicted-PCR-size-table","flanking-seq="])
+		opts, args = getopt.getopt(sys.argv[1:], "hm:i:o:p:cr:b:f:", ["help", "mismatch=", "input=", "output=", "primer=", "contig","round="\
+			,"binning=","mixte","full-locus-name","predicted-PCR-size-table","flanking-seq="])
 	except getopt.GetoptError as err:
 		usage()
 		sys.exit(2)
@@ -496,7 +496,7 @@ def main() : #run find() for each genome file in the directory with all primers 
 		elif opt in ("-b", "--binning"):
 			binning = True
 			global dico_bin
-			dico_bin = build_dictionnary()
+			dico_bin = build_dictionnary(arg)
 		elif opt in "--mixte" :
 			mixte = True
 		elif opt in "--full-locus-name" :
