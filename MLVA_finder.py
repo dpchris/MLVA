@@ -422,8 +422,8 @@ def run (Primers,fasta,round,nbmismatch) :
 
 	return result
 
-def usage() : #example of command to use insilico.py 
-	print ("./insilico.py -i <input_directory> -o <output_directory> -p <primers_file> \n \
+def usage() : #example of command to use MLVA_finder.py 
+	print ("./MLVA_finder.py -i <input_directory> -o <output_directory> -p <primers_file> \n \
 	[option -c for contigs] \n\
 	[option -m x for number of mismatch, default = 2] \n\
 	[option -r x : round MLVA score, default = 0.25] \n\
@@ -550,10 +550,10 @@ def main() : #run find() for each genome file in the directory with all primers 
 			output_file=[]
 			header = ["strain","primer","position1","position2","size","allele","sequence","nb_mismatch","primer1","mismatch1","primer2","mismatch2","predicted PCR target"]
 			if flanking is True : header.extend(['flanking1',"flanking2"])
-			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","w",encoding='utf-8'), delimiter=';',quoting=csv.QUOTE_NONE)
+			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","w",encoding='utf-8'), delimiter=',',quoting=csv.QUOTE_NONE)
 			for row in [header] :
 				out.writerow(row)
-			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","a",encoding='utf-8'), delimiter=';',quoting=csv.QUOTE_NONE)
+			out = csv.writer(open(output_path+fasta_path.split("/")[-2]+"_output.csv","a",encoding='utf-8'), delimiter=',',quoting=csv.QUOTE_NONE)
 
 		cr=[]
 		for Primer in Primers_short :
@@ -578,22 +578,22 @@ def main() : #run find() for each genome file in the directory with all primers 
 
 		if i==0 :
 			pathfile = output_path+"MLVA_analysis_"+fasta_path.split("/")[-2]+".csv"
-			output = open(pathfile,"w",encoding='utf-8') 									#output is a csv file (delimiter=";")
-			output.write(";".join(["key","Access_number"]+locus)+"\n")  	#header
+			output = open(pathfile,"w",encoding='utf-8') 									#output is a csv file (delimiter=",")
+			output.write(",".join(["key","Access_number"]+locus)+"\n")  	#header
 			output = open(pathfile,"a",encoding='utf-8')
 
-		output.write(";".join([str(i+1).zfill(3),file.split(".")[0]]+mlva_score)+"\n")
+		output.write(",".join([str(i+1).zfill(3),file.split(".")[0]]+mlva_score)+"\n")
 
 		#predicted PCR table
 		if predicted_PCR_size_table is True :
 
 			if i==0 :
 				pathfile = output_path+"predicted_PCR_size_table_"+fasta_path.split("/")[-2]+".csv"
-				output_pcr_size = open(pathfile,"w",encoding='utf-8') 									#output is a csv file (delimiter=";")
-				output_pcr_size.write(";".join(["key","Access_number"]+locus)+"\n")  	#header
+				output_pcr_size = open(pathfile,"w",encoding='utf-8') 									#output is a csv file (delimiter=",")
+				output_pcr_size.write(",".join(["key","Access_number"]+locus)+"\n")  	#header
 				output_pcr_size = open(pathfile,"a",encoding='utf-8')
 
-			output_pcr_size.write(";".join([str(i+1).zfill(3),file.split(".")[0]]+mlva_insert)+"\n")
+			output_pcr_size.write(",".join([str(i+1).zfill(3),file.split(".")[0]]+mlva_insert)+"\n")
 
 	output.close()
 	if predicted_PCR_size_table is True : output_pcr_size.close()
